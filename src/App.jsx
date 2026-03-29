@@ -5,6 +5,7 @@ import './App.css'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/portal/DashboardPage'
+import { HelpSupportPage } from './pages/portal/HelpSupportPage'
 import { LanguageUpdatePage } from './pages/portal/LanguageUpdatePage'
 import { PortalLayout } from './pages/portal/PortalLayout'
 import { QrDetailsPage } from './pages/portal/QrDetailsPage'
@@ -70,6 +71,10 @@ function App() {
         <Route
           path="/qr-details"
           element={<QrDetailsPage />}
+        />
+        <Route
+          path="/help-support"
+          element={<HelpSupportPage />}
         />
       </Route>
 

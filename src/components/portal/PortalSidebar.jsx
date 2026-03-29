@@ -43,11 +43,22 @@ function QrIcon() {
   )
 }
 
+function HelpSupportIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.4 9.2a2.7 2.7 0 1 1 4.5 2c-.8.7-1.6 1.2-1.6 2.3" />
+      <path d="M12 17h.01" />
+    </svg>
+  )
+}
+
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: DashboardIcon, end: true },
   { to: '/language-update', label: 'Language Update', icon: LanguageIcon },
-  { to: '/reports', label: 'Reports', icon: ReportsIcon },
+  { to: '/reports', label: 'Transaction Reports', icon: ReportsIcon },
   { to: '/qr-details', label: 'QR Details', icon: QrIcon },
+  { to: '/help-support', label: 'Help & Support', icon: HelpSupportIcon },
 ]
 
 export function PortalSidebar({ isCollapsed }) {
