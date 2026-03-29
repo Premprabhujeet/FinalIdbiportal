@@ -1,0 +1,8 @@
+<svg width="338" height="92" viewBox="0 0 338 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="338" height="92" rx="2" fill="#0E927E"/>
+  <circle cx="46" cy="46" r="33" fill="#F58220"/>
+  <circle cx="46" cy="46" r="22" fill="white"/>
+  <path d="M46 20C41.6 20 38 23.6 38 28V62H54V28C54 23.6 50.4 20 46 20Z" fill="#F58220"/>
+  <path d="M28 43C28 34.7 36.5 28 46 28C55.5 28 64 34.7 64 43H56C56 38.8 51.5 35 46 35C40.5 35 36 38.8 36 43H28Z" fill="#F58220"/>
+  <text x="88" y="58" fill="white" font-size="38" font-weight="700" font-family="Arial, Helvetica, sans-serif">IDBI BANK</text>
+</svg>
