@@ -44,6 +44,7 @@ function DeliveredIcon() {
 }
 
 const stats = [
+  // These summary cards are still static placeholders; the real fetched value is the cached userDetails payload.
   { label: 'Total Indents', value: '622', icon: <IndentIcon /> },
   { label: 'Total Mapped Devices', value: '21', icon: <MappedIcon /> },
   { label: 'Total In-transit Devices', value: '0', icon: <TransitIcon /> },
@@ -57,6 +58,7 @@ export function DashboardPage() {
     let isMounted = true
 
     const fetchUserDetails = async () => {
+      // This one-time bootstrap is triggered immediately after OIDC sign-in.
       const shouldFetchAfterRedirect =
         window.sessionStorage.getItem(authStorageKeys.userDetailsFetchPending) === 'true'
 
@@ -66,6 +68,7 @@ export function DashboardPage() {
 
       const storedProfile = window.sessionStorage.getItem(authStorageKeys.oidcProfile)
       const profileData = storedProfile ? JSON.parse(storedProfile) : null
+      // The backend expects the OIDC user_name claim as the mobile number input.
       const mobileNumber = profileData?.user_name ?? ''
 
       if (!mobileNumber) {
@@ -90,6 +93,7 @@ export function DashboardPage() {
         }
 
         console.log('[Dashboard] fetchById response', response)
+        // Other portal pages reuse this cached response instead of refetching immediately on mount.
         window.sessionStorage.setItem(authStorageKeys.userDetails, JSON.stringify(response))
         window.sessionStorage.removeItem(authStorageKeys.userDetailsFetchPending)
       } catch (error) {

@@ -54,6 +54,7 @@ function HelpSupportIcon() {
 }
 
 const navItems = [
+  // Sidebar order matches the latest portal navigation shared in the design.
   { to: '/dashboard', label: 'Dashboard', icon: DashboardIcon, end: true },
   { to: '/reports', label: 'Transaction Reports', icon: ReportsIcon },
   { to: '/qr-details', label: 'QR Details', icon: QrIcon },
@@ -68,6 +69,7 @@ export function PortalSidebar({ isCollapsed }) {
         <img src={IDBI_LOGO_URL} alt="IDBI Bank" />
       </div>
 
+      {/* NavLink adds the active-state styling automatically from the current route. */}
       <nav className="portal-nav" aria-label="Portal navigation">
         {navItems.map((item) => {
           const Icon = item.icon

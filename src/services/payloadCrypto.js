@@ -15,6 +15,7 @@ export function encryptRequestData(requestBody) {
     typeof requestBody === 'string' ? requestBody : JSON.stringify(requestBody ?? {})
   const iv = CryptoJS.lib.WordArray.random(16)
   const decodedKey = getDecodedKey()
+  // The backend expects AES-CBC with a random IV prefixed to the ciphertext before Base64 encoding.
   const encrypted = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(serializedBody), decodedKey, {
     iv,
     padding: CryptoJS.pad.Pkcs7,
@@ -31,6 +32,7 @@ export function decryptResponseData(responseBody) {
   }
 
   const byteCipherText = CryptoJS.enc.Base64.parse(responseBody)
+  // The first 16 bytes contain the IV; the remaining bytes are the actual ciphertext.
   const iv = CryptoJS.lib.WordArray.create(byteCipherText.words.slice(0, 4), 16)
   const cipherText = CryptoJS.lib.WordArray.create(
     byteCipherText.words.slice(4),
@@ -56,6 +58,7 @@ export function decodeApiResponse(responseData) {
     return responseData
   }
 
+  // Some APIs return encrypted JSON inside ResponseData, others already return plain JSON.
   const decryptedString = decryptResponseData(responseData.ResponseData)
 
   try {

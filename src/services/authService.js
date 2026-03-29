@@ -91,6 +91,7 @@ function buildMockSession({ username, rememberDevice }) {
   }
 
   return {
+    // Mock mode produces JWT-shaped values so the rest of the app can behave like a real auth session exists.
     accessToken: createMockJwt(tokenPayload),
     refreshToken: `mock-refresh-${crypto.randomUUID()}`,
     idToken: createMockJwt({
@@ -111,6 +112,7 @@ function buildStaticSession({ rememberDevice }) {
   const accessToken = staticHeader.Authorization?.replace(/^Bearer\s+/i, '') ?? ''
 
   return {
+    // Static mode skips token exchange entirely and simply exposes the configured fixed bearer token.
     accessToken,
     refreshToken: '',
     idToken: '',
@@ -133,6 +135,7 @@ function normalizeTokenResponse(tokenResponse) {
   }
 
   return {
+    // The rest of the app consumes camelCase keys, so external token responses are normalized here once.
     accessToken,
     refreshToken: tokenResponse.refresh_token ?? '',
     idToken: tokenResponse.id_token ?? '',
@@ -159,6 +162,7 @@ export function saveOidcUserSession(userData, { persist = true } = {}) {
   )
   console.log('[OIDC] Token response', userData)
 
+  // Normalize the OIDC user object into the simpler session shape consumed by apiClient/authStorage.
   const session = {
     accessToken: userData.access_token,
     refreshToken: userData.refresh_token ?? '',
@@ -274,6 +278,7 @@ export async function refreshAccessToken() {
   const currentSession = getAuthSession()
 
   if (!currentSession?.refreshToken) {
+    // Static auth mode never refreshes; it just keeps reusing the configured fixed token.
     if (authConfig.useStaticAuth && currentSession?.accessToken) {
       return currentSession.accessToken
     }
@@ -351,6 +356,7 @@ export function getAuthorizationHeader() {
   const session = getAuthSession()
 
   if (!session?.accessToken) {
+    // Static auth keeps some APIs working even when there is no live OIDC/user session.
     return authConfig.useStaticAuth ? getStaticAuthorizationHeader() : {}
   }
 

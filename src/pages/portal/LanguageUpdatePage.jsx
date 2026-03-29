@@ -6,6 +6,7 @@ import { LoaderOverlay } from '../../components/ui/LoaderOverlay'
 import { Snackbar } from '../../components/ui/Snackbar'
 import { apiRequest } from '../../services/apiClient'
 
+// Initial form state
 const initialValues = {
   vpaId: '',
   deviceSerialNumber: '',
@@ -14,22 +15,36 @@ const initialValues = {
 }
 
 export function LanguageUpdatePage() {
+  // Form state
   const [formValues, setFormValues] = useState(initialValues)
+
+  // Track touched fields for validation UI
   const [touched, setTouched] = useState({})
+
+  // Success modal visibility
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
   const [isInitializingPage, setIsInitializingPage] = useState(false)
   const [isUpdatingLanguage, setIsUpdatingLanguage] = useState(false)
   const [languageOptions, setLanguageOptions] = useState([])
+
+  // Success message from API
   const [successMessage, setSuccessMessage] = useState('Language update request initiated successfully')
+
+  // Snackbar (error/success toast)
   const [snackbarState, setSnackbarState] = useState({
     open: false,
     message: '',
     autoClose: true,
     colorType: 'danger',
   })
+
+  // Refs to avoid unnecessary API calls
   const fetchedCurrentLanguageForTidRef = useRef('')
   const hasFetchedLanguageOptionsRef = useRef(false)
 
+  // -----------------------------
+  // Fetch user details from sessionStorage
+  // -----------------------------
   useEffect(() => {
     const storedUserDetails = window.sessionStorage.getItem(authStorageKeys.userDetails)
     if (!storedUserDetails) {
@@ -38,6 +53,8 @@ export function LanguageUpdatePage() {
 
     try {
       const parsedUserDetails = JSON.parse(storedUserDetails)
+
+      // Handle different response formats
       const firstUserDetails = Array.isArray(parsedUserDetails)
         ? parsedUserDetails[0] ?? null
         : parsedUserDetails?.data && Array.isArray(parsedUserDetails.data)
@@ -48,6 +65,7 @@ export function LanguageUpdatePage() {
         return
       }
 
+      // Populate read-only fields
       setFormValues((current) => ({
         ...current,
         vpaId: firstUserDetails.vpa_id ?? current.vpaId,
@@ -58,13 +76,19 @@ export function LanguageUpdatePage() {
     }
   }, [])
 
+  // -----------------------------
+  // Initialize page (Fetch current language + language options)
+  // -----------------------------
   useEffect(() => {
     let isMounted = true
+
     const initializeLanguagePage = async () => {
+      // Do nothing if device serial is missing
       if (!formValues.deviceSerialNumber) {
         return
       }
 
+      // Prevent duplicate API calls
       if (
         fetchedCurrentLanguageForTidRef.current === formValues.deviceSerialNumber &&
         hasFetchedLanguageOptionsRef.current
@@ -79,6 +103,9 @@ export function LanguageUpdatePage() {
       let failedStep = 'current-language'
 
       try {
+        // -----------------------------
+        // Fetch Current Language
+        // -----------------------------
         if (fetchedCurrentLanguageForTidRef.current !== formValues.deviceSerialNumber) {
           fetchedCurrentLanguageForTidRef.current = formValues.deviceSerialNumber
 
@@ -94,11 +121,14 @@ export function LanguageUpdatePage() {
           }
 
           console.log('[Language Update] current language response', currentLanguageResponse)
+
+          // Store response in session
           window.sessionStorage.setItem(
             authStorageKeys.currentLanguage,
             JSON.stringify(currentLanguageResponse),
           )
 
+          // Extract language safely from different response structures
           const currentLanguageValue =
             typeof currentLanguageResponse === 'string'
               ? currentLanguageResponse
@@ -109,6 +139,7 @@ export function LanguageUpdatePage() {
                 currentLanguageResponse?.data ??
                 ''
 
+          // Update form state
           setFormValues((current) => ({
             ...current,
             currentLanguage:
@@ -118,6 +149,9 @@ export function LanguageUpdatePage() {
           }))
         }
 
+        // -----------------------------
+        // Fetch Language Options (Dropdown)
+        // -----------------------------
         if (!hasFetchedLanguageOptionsRef.current) {
           failedStep = 'language-options'
           hasFetchedLanguageOptionsRef.current = true
@@ -131,11 +165,14 @@ export function LanguageUpdatePage() {
           }
 
           console.log('[Language Update] fetch language response', languageOptionsResponse)
+
+          // Store response
           window.sessionStorage.setItem(
             authStorageKeys.languageOptions,
             JSON.stringify(languageOptionsResponse),
           )
 
+          // Normalize response into string array
           const rawLanguageList = Array.isArray(languageOptionsResponse?.data)
             ? languageOptionsResponse.data
             : Array.isArray(languageOptionsResponse)
@@ -153,6 +190,7 @@ export function LanguageUpdatePage() {
           setLanguageOptions(languageList)
         }
       } catch (error) {
+        // Reset refs on failure
         if (fetchedCurrentLanguageForTidRef.current === formValues.deviceSerialNumber) {
           fetchedCurrentLanguageForTidRef.current = ''
         }
@@ -160,6 +198,7 @@ export function LanguageUpdatePage() {
         hasFetchedLanguageOptionsRef.current = false
 
         console.error('[Language Update] Failed during initialization', error)
+
         if (isMounted) {
           setSnackbarState({
             open: true,
@@ -185,6 +224,9 @@ export function LanguageUpdatePage() {
     }
   }, [formValues.deviceSerialNumber])
 
+  // -----------------------------
+  // Validation Logic
+  // -----------------------------
   const errors = useMemo(
     () => ({
       vpaId: formValues.vpaId.trim() ? '' : 'VPA ID is required.',
@@ -197,8 +239,12 @@ export function LanguageUpdatePage() {
     [formValues],
   )
 
+  // Form validity check
   const isFormValid = Object.values(errors).every((value) => !value)
 
+  // -----------------------------
+  // Handlers
+  // -----------------------------
   const handleChange = (field) => (event) => {
     const value = event.target.value
     setFormValues((current) => ({ ...current, [field]: value }))
@@ -208,19 +254,25 @@ export function LanguageUpdatePage() {
     setTouched((current) => ({ ...current, [field]: true }))
   }
 
+  // Reset form
   const handleCancel = () => {
     setFormValues(initialValues)
     setTouched({})
   }
 
+  // Close success modal
   const handleCloseModal = () => {
     handleCancel()
     setIsSuccessModalOpen(false)
   }
 
+  // -----------------------------
+  // Submit Handler (POST API)
+  // -----------------------------
   const handleSubmit = async (event) => {
     event.preventDefault()
 
+    // Show all validation errors if invalid
     if (!isFormValid) {
       setTouched({
         vpaId: true,
@@ -234,6 +286,7 @@ export function LanguageUpdatePage() {
     try {
       setIsUpdatingLanguage(true)
 
+      // API expects only tid + update_language
       const response = await apiRequest(apiConfig.updateLanguageEndpoint, {
         method: 'POST',
         body: JSON.stringify({
@@ -243,12 +296,16 @@ export function LanguageUpdatePage() {
       })
 
       console.log('[Language Update] update response', response)
+
+      // Store response
       window.sessionStorage.setItem(authStorageKeys.languageUpdateResponse, JSON.stringify(response))
 
+      // Show success
       setSuccessMessage(response?.statusDesc || response?.message || 'Language updated successfully')
       setIsSuccessModalOpen(true)
     } catch (error) {
       console.error('[Language Update] Failed to update language', error)
+
       setSnackbarState({
         open: true,
         message: 'unable to update language',
@@ -260,12 +317,18 @@ export function LanguageUpdatePage() {
     }
   }
 
+  // -----------------------------
+  // UI Rendering
+  // -----------------------------
   return (
     <section className="portal-section language-update-page">
+      {/* Loader overlay for API calls */}
       <LoaderOverlay
         open={isInitializingPage || isUpdatingLanguage}
         text="IDBI Bank Loading........"
       />
+
+      {/* Snackbar for errors */}
       <Snackbar
         open={snackbarState.open}
         message={snackbarState.message}
@@ -281,8 +344,11 @@ export function LanguageUpdatePage() {
 
       <h1 className="portal-section__title">Language Update</h1>
 
+      {/* Form */}
       <form className="language-update-card" onSubmit={handleSubmit}>
         <div className="language-update-grid">
+
+          {/* VPA ID (read-only) */}
           <label className="language-update-field">
             <span>VPA ID</span>
             <input
@@ -298,6 +364,7 @@ export function LanguageUpdatePage() {
             ) : null}
           </label>
 
+          {/* Device Serial Number (read-only) */}
           <label className="language-update-field">
             <span>Device Serial Number</span>
             <input
@@ -315,6 +382,7 @@ export function LanguageUpdatePage() {
             ) : null}
           </label>
 
+          {/* Current Language */}
           <label className="language-update-field">
             <span>Current Language</span>
             <input
@@ -329,6 +397,7 @@ export function LanguageUpdatePage() {
             ) : null}
           </label>
 
+          {/* Language Dropdown */}
           <label className="language-update-field">
             <span>Language Update</span>
             <select
@@ -349,6 +418,7 @@ export function LanguageUpdatePage() {
           </label>
         </div>
 
+        {/* Actions */}
         <div className="language-update-actions">
           <button
             className="ui-button ui-button--secondary"

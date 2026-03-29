@@ -57,6 +57,7 @@ export function PortalTopNav({ isSidebarCollapsed, onToggleSidebar, onLogout }) 
   const profileMenuRef = useRef(null)
 
   useEffect(() => {
+    // Close the dropdown when the user clicks outside it or presses Escape.
     const handleClickOutside = (event) => {
       if (!profileMenuRef.current?.contains(event.target)) {
         setIsProfileMenuOpen(false)
@@ -90,11 +91,13 @@ export function PortalTopNav({ isSidebarCollapsed, onToggleSidebar, onLogout }) 
       return []
     }
 
+    // Only render primitive values so nested objects do not break the simple key/value modal.
     return Object.entries(value).filter(([, entryValue]) => {
       return typeof entryValue !== 'object' || entryValue === null
     })
   }
 
+  // The user details API can return different shapes, so normalize it before rendering.
   const detailSource = Array.isArray(profileDetails)
     ? profileDetails[0] ?? null
     : profileDetails?.data && Array.isArray(profileDetails.data)
@@ -109,6 +112,7 @@ export function PortalTopNav({ isSidebarCollapsed, onToggleSidebar, onLogout }) 
     const profileData = storedProfile ? JSON.parse(storedProfile) : null
     const mobileNumber = profileData?.user_name ?? ''
 
+    // Collapse the menu before opening the loading state or modal.
     setIsProfileMenuOpen(false)
     setIsFetchingProfileDetails(true)
 
@@ -218,6 +222,7 @@ export function PortalTopNav({ isSidebarCollapsed, onToggleSidebar, onLogout }) 
         </div>
       </div>
 
+      {/* The modal stays in the top-nav component because the trigger and fetched state live here. */}
       {isProfileDetailsOpen ? (
         <div className="profile-details-modal-overlay" role="presentation">
           <div

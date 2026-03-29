@@ -4,6 +4,7 @@ import { apiConfig } from '../../config/apiConfig'
 import { LoaderOverlay } from '../../components/ui/LoaderOverlay'
 import { Snackbar } from '../../components/ui/Snackbar'
 
+// List of months for monthly filter dropdown
 const monthlyOptions = [
   'January',
   'February',
@@ -19,6 +20,7 @@ const monthlyOptions = [
   'December',
 ]
 
+// Table column configuration (key -> API field, label -> UI header)
 const reportColumns = [
   { key: 'Account_Number', label: 'Account Number' },
   { key: 'VPA_ID', label: 'VPA ID' },
@@ -28,6 +30,7 @@ const reportColumns = [
   { key: 'RRN', label: 'RRN' },
 ]
 
+// Convert YYYY-MM-DD → DD/MM/YYYY (API expected format)
 function formatDateForApi(dateValue) {
   if (!dateValue) {
     return ''
@@ -41,6 +44,7 @@ function formatDateForApi(dateValue) {
   return `${day}/${month}/${year}`
 }
 
+// Get today's date in input[type=date] format
 function getTodayInputValue() {
   const today = new Date()
   const year = today.getFullYear()
@@ -49,6 +53,7 @@ function getTodayInputValue() {
   return `${year}-${month}-${day}`
 }
 
+// Format Date object → YYYY-MM-DD
 function formatInputDate(dateValue) {
   const year = dateValue.getFullYear()
   const month = String(dateValue.getMonth() + 1).padStart(2, '0')
@@ -56,6 +61,7 @@ function formatInputDate(dateValue) {
   return `${year}-${month}-${day}`
 }
 
+// Get start & end date for selected month (current year)
 function getMonthDateRange(monthName) {
   const monthIndex = monthlyOptions.indexOf(monthName)
 
@@ -72,6 +78,7 @@ function getMonthDateRange(monthName) {
   }
 }
 
+// Fetch user details from sessionStorage and normalize structure
 function getStoredUserDetailsRecord() {
   const storedUserDetails = window.sessionStorage.getItem(authStorageKeys.userDetails)
 
@@ -97,14 +104,17 @@ function getStoredUserDetailsRecord() {
   }
 }
 
+// Ensure rows is always an array
 function normalizeReportRows(rows) {
   return Array.isArray(rows) ? rows : []
 }
 
+// Extract meaningful error message
 function getErrorMessage(error, fallbackMessage) {
   return error?.statusDescription || error?.message || fallbackMessage
 }
 
+// Escape special characters for Excel export
 function escapeExcelCell(value) {
   const normalizedValue = String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -115,6 +125,7 @@ function escapeExcelCell(value) {
   return normalizedValue
 }
 
+// Download report as Excel (HTML table trick)
 function downloadReportRowsAsExcel(rows) {
   if (!rows.length) {
     return false
@@ -154,17 +165,21 @@ function downloadReportRowsAsExcel(rows) {
   const blob = new Blob([htmlContent], {
     type: 'application/vnd.ms-excel;charset=utf-8;',
   })
+
   const downloadUrl = window.URL.createObjectURL(blob)
   const downloadLink = document.createElement('a')
   downloadLink.href = downloadUrl
   downloadLink.download = 'idbi-reports.xls'
+
   document.body.appendChild(downloadLink)
   downloadLink.click()
   document.body.removeChild(downloadLink)
+
   window.URL.revokeObjectURL(downloadUrl)
   return true
 }
 
+// API call to fetch reports
 async function fetchReports({ startDate, endDate, vpaId }) {
   const response = await fetch(apiConfig.reportsQuerySubmitUserEndpoint, {
     method: 'POST',
@@ -185,8 +200,8 @@ async function fetchReports({ startDate, endDate, vpaId }) {
   if (!response.ok) {
     const error = new Error(
       responseData?.statusDescription ||
-        responseData?.message ||
-        `API request failed with status ${response.status}`,
+      responseData?.message ||
+      `API request failed with status ${response.status}`,
     )
     error.statusDescription = responseData?.statusDescription ?? ''
     throw error
@@ -196,19 +211,30 @@ async function fetchReports({ startDate, endDate, vpaId }) {
 }
 
 export function ReportsPage() {
+  // Initial values
   const todayInputValue = useMemo(() => getTodayInputValue(), [])
   const currentMonthIndex = useMemo(() => new Date().getMonth(), [])
+
+  // Filter states
   const [filterType, setFilterType] = useState('custom')
   const [searchValue, setSearchValue] = useState('')
   const [monthlySelection, setMonthlySelection] = useState(monthlyOptions[0])
+
+  // Pagination states
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [currentPage, setCurrentPage] = useState(1)
   const [goToPageInput, setGoToPageInput] = useState('1')
+
+  // Date filters
   const [startDate, setStartDate] = useState(todayInputValue)
   const [endDate, setEndDate] = useState(todayInputValue)
+
+  // API response states
   const [reportResponse, setReportResponse] = useState(null)
   const [reportRows, setReportRows] = useState([])
   const [isFetchingReports, setIsFetchingReports] = useState(false)
+
+  // Snackbar
   const [snackbarState, setSnackbarState] = useState({
     open: false,
     message: '',
@@ -216,6 +242,9 @@ export function ReportsPage() {
     colorType: 'danger',
   })
 
+  // -----------------------------
+  // Fetch Reports
+  // -----------------------------
   const loadReports = async ({ nextStartDate, nextEndDate }) => {
     const userDetailsRecord = getStoredUserDetailsRecord()
     const vpaId = userDetailsRecord?.vpa_id ?? ''
@@ -244,6 +273,8 @@ export function ReportsPage() {
       console.log('[Reports] querysubmit_user response', response)
       setReportResponse(response)
       setReportRows(normalizeReportRows(response?.data))
+
+      // Reset pagination
       setCurrentPage(1)
       setGoToPageInput('1')
     } catch (error) {
@@ -261,6 +292,7 @@ export function ReportsPage() {
     }
   }
 
+  // Auto-fetch for "Today"
   useEffect(() => {
     if (filterType !== 'today') {
       return
@@ -268,12 +300,14 @@ export function ReportsPage() {
 
     setStartDate(todayInputValue)
     setEndDate(todayInputValue)
+
     loadReports({
       nextStartDate: todayInputValue,
       nextEndDate: todayInputValue,
     })
   }, [filterType, todayInputValue])
 
+  // Search filtering
   const filteredRows = useMemo(() => {
     const term = searchValue.trim().toLowerCase()
 
@@ -286,6 +320,7 @@ export function ReportsPage() {
     )
   }, [reportRows, searchValue])
 
+  // Pagination calculations
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage))
 
   useEffect(() => {
@@ -301,11 +336,13 @@ export function ReportsPage() {
     setGoToPageInput(String(currentPage))
   }, [currentPage, totalPages])
 
+  // Get current page rows
   const paginatedRows = useMemo(() => {
     const startIndex = (currentPage - 1) * rowsPerPage
     return filteredRows.slice(startIndex, startIndex + rowsPerPage)
   }, [currentPage, filteredRows, rowsPerPage])
 
+  // Pagination UI logic
   const paginationItems = useMemo(() => {
     if (totalPages <= 5) {
       return Array.from({ length: totalPages }, (_, index) => index + 1)
@@ -322,6 +359,9 @@ export function ReportsPage() {
     return [1, 'ellipsis-left', currentPage, 'ellipsis-right', totalPages]
   }, [currentPage, totalPages])
 
+  // -----------------------------
+  // Handlers
+  // -----------------------------
   const handlePageChange = (page) => {
     if (page < 1 || page > totalPages) {
       return
@@ -373,6 +413,7 @@ export function ReportsPage() {
 
     setStartDate(monthDateRange.startDate)
     setEndDate(monthDateRange.endDate)
+
     loadReports({
       nextStartDate: monthDateRange.startDate,
       nextEndDate: monthDateRange.endDate,
@@ -392,9 +433,16 @@ export function ReportsPage() {
     }
   }
 
+  // -----------------------------
+  // UI
+  // -----------------------------
   return (
+    // UI remains unchanged (only comments added above)
     <section className="portal-section reports-page">
+          {/* Loader for API calls */}
       <LoaderOverlay open={isFetchingReports} text="IDBI Bank Loading........" />
+
+      {/* Snackbar for error/warning messages */}
       <Snackbar
         open={snackbarState.open}
         message={snackbarState.message}
@@ -410,9 +458,13 @@ export function ReportsPage() {
 
       <h1 className="portal-section__title">Transaction Reports</h1>
 
+      {/* -----------------------------
+          Filter Section (Today / Monthly / Custom)
+      ----------------------------- */}
       <div className="reports-filter-card">
         <p className="reports-filter-card__label">Select a Report Filter</p>
 
+        {/* Radio buttons for filter selection */}
         <div className="reports-filter-card__options">
           <label className="reports-radio">
             <input
@@ -445,8 +497,11 @@ export function ReportsPage() {
           </label>
         </div>
 
+        {/* Show controls only if NOT "Today" */}
         {filterType !== 'today' ? (
           <div className="reports-filter-card__controls">
+
+            {/* Monthly dropdown */}
             {filterType === 'monthly' ? (
               <label className="reports-input-group reports-input-group--wide">
                 <span>Monthly Range</span>
@@ -463,6 +518,7 @@ export function ReportsPage() {
               </label>
             ) : (
               <>
+                {/* Custom Date Range */}
                 <label className="reports-input-group">
                   <span>Start Date</span>
                   <input
@@ -483,6 +539,7 @@ export function ReportsPage() {
               </>
             )}
 
+            {/* Submit button */}
             <button
               className="reports-action-button"
               type="button"
@@ -501,7 +558,12 @@ export function ReportsPage() {
         ) : null}
       </div>
 
+      {/* -----------------------------
+          Table Section
+      ----------------------------- */}
       <div className="reports-table-card">
+
+        {/* Toolbar (Search + Summary + Download) */}
         <div className="reports-table-card__toolbar">
           <label className="reports-search">
             <input
@@ -512,9 +574,12 @@ export function ReportsPage() {
             />
           </label>
 
+          {/* Summary info */}
           <div className="reports-summary">
             <span>Rows: {reportResponse?.row_count ?? reportRows.length}</span>
             <span>Total Amount: {reportResponse?.total_amount ?? 0}</span>
+
+            {/* Download all rows */}
             <button
               className="reports-action-button reports-action-button--small"
               type="button"
@@ -525,27 +590,36 @@ export function ReportsPage() {
           </div>
         </div>
 
+        {/* Table Wrapper */}
         <div className="reports-table-wrapper">
           <table className="reports-table">
             <thead>
               <tr>
+                {/* Serial Number Column */}
                 <th>S. No.</th>
+
+                {/* Dynamic columns */}
                 {reportColumns.map((column) => (
                   <th key={column.key}>{column.label}</th>
                 ))}
               </tr>
             </thead>
+
             <tbody>
               {paginatedRows.length ? (
                 paginatedRows.map((row, index) => (
                   <tr key={`${row.Transaction_Id ?? 'row'}-${index}`}>
+                    {/* Serial Number */}
                     <td>{(currentPage - 1) * rowsPerPage + index + 1}</td>
+
+                    {/* Row Data */}
                     {reportColumns.map((column) => (
                       <td key={column.key}>{String(row?.[column.key] ?? '-')}</td>
                     ))}
                   </tr>
                 ))
               ) : (
+                // Empty State
                 <tr>
                   <td colSpan={reportColumns.length + 1} className="reports-table__empty">
                     No report data available.
@@ -556,9 +630,16 @@ export function ReportsPage() {
           </table>
         </div>
 
+        {/* -----------------------------
+            Pagination Section
+        ----------------------------- */}
         <div className="reports-table-card__footer">
+
+          {/* Pagination Controls */}
           <div className="reports-table-card__meta">
             <span>Row per page</span>
+
+            {/* Rows per page selector */}
             <select
               value={rowsPerPage}
               onChange={(event) => setRowsPerPage(Number(event.target.value))}
@@ -567,6 +648,8 @@ export function ReportsPage() {
               <option value="10">10</option>
               <option value="15">15</option>
             </select>
+
+            {/* Go to page input */}
             <span>Go to</span>
             <input
               type="text"
@@ -581,7 +664,9 @@ export function ReportsPage() {
             />
           </div>
 
+          {/* Pagination Buttons */}
           <div className="reports-pagination">
+            {/* Previous Button */}
             <button
               type="button"
               aria-label="Previous page"
@@ -591,6 +676,7 @@ export function ReportsPage() {
               &lt;
             </button>
 
+            {/* Page Numbers */}
             {paginationItems.map((item, index) =>
               typeof item === 'number' ? (
                 <button
@@ -606,6 +692,7 @@ export function ReportsPage() {
               ),
             )}
 
+            {/* Next Button */}
             <button
               type="button"
               aria-label="Next page"

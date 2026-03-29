@@ -21,6 +21,7 @@ async function buildRequestOptions(options = {}) {
   const headers = new Headers(options.headers ?? {})
   const authHeader = getAuthorizationHeader()
   const passKeyHeader = getStaticPassKeyHeader()
+  // Most POST-style APIs expect the payload to be wrapped and encrypted under RequestData.
   const body = shouldEncryptBody(options)
     ? JSON.stringify({
         RequestData: encryptRequestData(options.body),
@@ -58,6 +59,7 @@ export async function apiRequest(url, options = {}) {
 
   if (response.status === 401) {
     try {
+      // A single silent retry keeps feature pages simpler and centralizes token refresh behavior.
       const freshAccessToken = await refreshAccessToken()
       requestOptions = await buildRequestOptions({
         ...options,
@@ -73,6 +75,7 @@ export async function apiRequest(url, options = {}) {
   }
 
   const rawData = await parseJsonSafely(response)
+  // decodeApiResponse is a no-op for plain JSON responses and only decrypts ResponseData payloads.
   const data = decodeApiResponse(rawData)
 
   if (!response.ok) {
