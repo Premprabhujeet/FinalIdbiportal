@@ -55,9 +55,9 @@ function HelpSupportIcon() {
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: DashboardIcon, end: true },
-  { to: '/language-update', label: 'Language Update', icon: LanguageIcon },
   { to: '/reports', label: 'Transaction Reports', icon: ReportsIcon },
   { to: '/qr-details', label: 'QR Details', icon: QrIcon },
+  { to: '/language-update', label: 'Language Update', icon: LanguageIcon },
   { to: '/help-support', label: 'Help & Support', icon: HelpSupportIcon },
 ]
 
