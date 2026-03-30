@@ -81,10 +81,13 @@ function getMonthDateRange(monthName) {
 
   const today = new Date()
   const currentYear = today.getFullYear()
+  const isCurrentMonth = monthIndex === today.getMonth()
 
   return {
     startDate: formatInputDate(new Date(currentYear, monthIndex, 1)),
-    endDate: formatInputDate(new Date(currentYear, monthIndex + 1, 0)),
+    endDate: isCurrentMonth
+      ? formatInputDate(today)
+      : formatInputDate(new Date(currentYear, monthIndex + 1, 0)),
   }
 }
 
