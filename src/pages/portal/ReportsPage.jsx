@@ -127,83 +127,53 @@ function getErrorMessage(error, fallbackMessage) {
   return error?.statusDescription || error?.message || fallbackMessage
 }
 
-function escapeXml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+function escapeCsvCell(value) {
+  return String(value ?? '').replace(/"/g, '""')
 }
 
-function getExcelCellXml(value, type) {
-  if (type === 'Number') {
-    const numericValue = Number(value)
+function formatCsvCell(value, type) {
+  const normalizedValue = String(value ?? '-')
 
-    if (Number.isFinite(numericValue)) {
-      return `<Data ss:Type="Number">${numericValue}</Data>`
-    }
+  if (type === 'String') {
+    return `"=""${escapeCsvCell(normalizedValue)}"""`
   }
 
-  return `<Data ss:Type="String">${escapeXml(value)}</Data>`
+  return `"${escapeCsvCell(normalizedValue)}"`
 }
 
-// Download report as Excel workbook XML so Excel preserves text values like account number and RRN.
+// Download report as CSV so Excel opens it directly without extension mismatch warnings.
 function downloadReportRowsAsExcel(rows) {
   if (!rows.length) {
     return false
   }
 
   const headerRow = excelExportColumns
-    .map((column) => `<Cell ss:StyleID="header"><Data ss:Type="String">${escapeXml(column.label)}</Data></Cell>`)
-    .join('')
+    .map((column) => `"${escapeCsvCell(column.label)}"`)
+    .join(',')
 
   const dataRows = rows
     .map(
       (row, index) =>
-        `<Row>${excelExportColumns
+        excelExportColumns
           .map((column) => {
             const cellValue =
               column.key === 'serialNumber' ? index + 1 : row?.[column.key] ?? '-'
-            return `<Cell ss:StyleID="${column.type === 'Number' ? 'cell' : 'text'}">${getExcelCellXml(cellValue, column.type)}</Cell>`
+            return formatCsvCell(cellValue, column.type)
           })
-          .join('')}</Row>`,
+          .join(','),
     )
-    .join('')
+    .join('\r\n')
 
-  const workbookContent = `<?xml version="1.0"?>
-    <?mso-application progid="Excel.Sheet"?>
-    <Workbook
-      xmlns="urn:schemas-microsoft-com:office:spreadsheet"
-      xmlns:o="urn:schemas-microsoft-com:office:office"
-      xmlns:x="urn:schemas-microsoft-com:office:excel"
-      xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
-    >
-      <Styles>
-        <Style ss:ID="header">
-          <Font ss:Bold="1" />
-        </Style>
-        <Style ss:ID="text">
-          <NumberFormat ss:Format="@" />
-        </Style>
-        <Style ss:ID="cell" />
-      </Styles>
-      <Worksheet ss:Name="Reports">
-        <Table>
-          <Row>${headerRow}</Row>
-          ${dataRows}
-        </Table>
-      </Worksheet>
-    </Workbook>
-  `
+  const csvContent = `\uFEFF${headerRow}\r\n${dataRows}`
 
-  const blob = new Blob([workbookContent], {
-    type: 'application/vnd.ms-excel;charset=utf-8;',
+  const blob = new Blob([csvContent], {
+    type: 'text/csv;charset=utf-8;',
   })
 
   const downloadUrl = window.URL.createObjectURL(blob)
   const downloadLink = document.createElement('a')
   downloadLink.href = downloadUrl
-  downloadLink.download = 'idbi-reports.xls'
+  downloadLink.download = 'idbi-reports.csv'
 
   document.body.appendChild(downloadLink)
   downloadLink.click()
