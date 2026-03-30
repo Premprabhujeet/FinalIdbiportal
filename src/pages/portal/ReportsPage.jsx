@@ -30,6 +30,16 @@ const reportColumns = [
   { key: 'RRN', label: 'RRN' },
 ]
 
+const excelExportColumns = [
+  { key: 'serialNumber', label: 'S. No.', type: 'Number' },
+  { key: 'Account_Number', label: 'Account Number', type: 'String' },
+  { key: 'VPA_ID', label: 'VPA ID', type: 'String' },
+  { key: 'Date_&_Time', label: 'Date & Time', type: 'String' },
+  { key: 'Transaction_Amount', label: 'Transaction Amount', type: 'Number' },
+  { key: 'Transaction_Id', label: 'Transaction ID', type: 'String' },
+  { key: 'RRN', label: 'RRN', type: 'String' },
+]
+
 // Convert YYYY-MM-DD → DD/MM/YYYY (API expected format)
 function formatDateForApi(dateValue) {
   if (!dateValue) {
@@ -114,55 +124,76 @@ function getErrorMessage(error, fallbackMessage) {
   return error?.statusDescription || error?.message || fallbackMessage
 }
 
-// Escape special characters for Excel export
-function escapeExcelCell(value) {
-  const normalizedValue = String(value ?? '')
+function escapeXml(value) {
+  return String(value ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-
-  return normalizedValue
 }
 
-// Download report as Excel (HTML table trick)
+function getExcelCellXml(value, type) {
+  if (type === 'Number') {
+    const numericValue = Number(value)
+
+    if (Number.isFinite(numericValue)) {
+      return `<Data ss:Type="Number">${numericValue}</Data>`
+    }
+  }
+
+  return `<Data ss:Type="String">${escapeXml(value)}</Data>`
+}
+
+// Download report as Excel workbook XML so Excel preserves text values like account number and RRN.
 function downloadReportRowsAsExcel(rows) {
   if (!rows.length) {
     return false
   }
 
-  const tableHeaders = reportColumns
-    .map((column) => `<th>${escapeExcelCell(column.label)}</th>`)
+  const headerRow = excelExportColumns
+    .map((column) => `<Cell ss:StyleID="header"><Data ss:Type="String">${escapeXml(column.label)}</Data></Cell>`)
     .join('')
 
-  const tableRows = rows
+  const dataRows = rows
     .map(
-      (row) =>
-        `<tr>${reportColumns
-          .map((column) => `<td>${escapeExcelCell(row?.[column.key] ?? '-')}</td>`)
-          .join('')}</tr>`,
+      (row, index) =>
+        `<Row>${excelExportColumns
+          .map((column) => {
+            const cellValue =
+              column.key === 'serialNumber' ? index + 1 : row?.[column.key] ?? '-'
+            return `<Cell ss:StyleID="${column.type === 'Number' ? 'cell' : 'text'}">${getExcelCellXml(cellValue, column.type)}</Cell>`
+          })
+          .join('')}</Row>`,
     )
     .join('')
 
-  const htmlContent = `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
-      <head>
-        <meta charset="UTF-8" />
-      </head>
-      <body>
-        <table>
-          <thead>
-            <tr>${tableHeaders}</tr>
-          </thead>
-          <tbody>
-            ${tableRows}
-          </tbody>
-        </table>
-      </body>
-    </html>
+  const workbookContent = `<?xml version="1.0"?>
+    <?mso-application progid="Excel.Sheet"?>
+    <Workbook
+      xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+      xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:x="urn:schemas-microsoft-com:office:excel"
+      xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+    >
+      <Styles>
+        <Style ss:ID="header">
+          <Font ss:Bold="1" />
+        </Style>
+        <Style ss:ID="text">
+          <NumberFormat ss:Format="@" />
+        </Style>
+        <Style ss:ID="cell" />
+      </Styles>
+      <Worksheet ss:Name="Reports">
+        <Table>
+          <Row>${headerRow}</Row>
+          ${dataRows}
+        </Table>
+      </Worksheet>
+    </Workbook>
   `
 
-  const blob = new Blob([htmlContent], {
+  const blob = new Blob([workbookContent], {
     type: 'application/vnd.ms-excel;charset=utf-8;',
   })
 
