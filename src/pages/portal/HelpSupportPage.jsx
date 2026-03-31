@@ -163,12 +163,6 @@ export function HelpSupportPage() {
         submittedFilters.status === 'All'
           ? true
           : ticket.status.toLowerCase() === submittedFilters.status.toLowerCase()
-      const matchesStartDate = submittedFilters.startDate
-        ? ticket.raisedDate >= submittedFilters.startDate
-        : true
-      const matchesEndDate = submittedFilters.endDate
-        ? ticket.raisedDate <= submittedFilters.endDate
-        : true
       const searchTerm = submittedFilters.search.trim().toLowerCase()
       const matchesSearch = searchTerm
         ? [
@@ -180,7 +174,7 @@ export function HelpSupportPage() {
           ].some((value) => String(value).toLowerCase().includes(searchTerm))
         : true
 
-      return matchesStatus && matchesStartDate && matchesEndDate && matchesSearch
+      return matchesStatus && matchesSearch
     })
   }, [submittedFilters, tickets])
 
