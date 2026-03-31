@@ -254,15 +254,22 @@ export function LanguageUpdatePage() {
     setTouched((current) => ({ ...current, [field]: true }))
   }
 
-  // Reset form
-  const handleCancel = () => {
-    setFormValues(initialValues)
+  const resetEditableFields = () => {
+    setFormValues((current) => ({
+      ...current,
+      languageUpdate: '',
+    }))
     setTouched({})
+  }
+
+  // Reset only the editable selection, while keeping fetched merchant details on screen.
+  const handleCancel = () => {
+    resetEditableFields()
   }
 
   // Close success modal
   const handleCloseModal = () => {
-    handleCancel()
+    resetEditableFields()
     setIsSuccessModalOpen(false)
   }
 
