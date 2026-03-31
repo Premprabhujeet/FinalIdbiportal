@@ -48,6 +48,7 @@ export function PortalTopNav({ isSidebarCollapsed, onToggleSidebar, onLogout }) 
   const [isProfileDetailsOpen, setIsProfileDetailsOpen] = useState(false)
   const [isFetchingProfileDetails, setIsFetchingProfileDetails] = useState(false)
   const [profileDetails, setProfileDetails] = useState(null)
+  const [storedUserDetailsRecord, setStoredUserDetailsRecord] = useState(null)
   const [snackbarState, setSnackbarState] = useState({
     open: false,
     message: '',
@@ -97,6 +98,87 @@ export function PortalTopNav({ isSidebarCollapsed, onToggleSidebar, onLogout }) 
     })
   }
 
+  const getStoredUserDetailsRecord = () => {
+    const storedUserDetails = window.sessionStorage.getItem(authStorageKeys.userDetails)
+
+    if (!storedUserDetails) {
+      return null
+    }
+
+    try {
+      const parsedUserDetails = JSON.parse(storedUserDetails)
+
+      if (Array.isArray(parsedUserDetails)) {
+        return parsedUserDetails[0] ?? null
+      }
+
+      if (parsedUserDetails?.data && Array.isArray(parsedUserDetails.data)) {
+        return parsedUserDetails.data[0] ?? null
+      }
+
+      if (parsedUserDetails?.data && typeof parsedUserDetails.data === 'object') {
+        return parsedUserDetails.data
+      }
+
+      return parsedUserDetails
+    } catch (error) {
+      console.error('[Profile Details] Failed to parse stored user details', error)
+      return null
+    }
+  }
+
+  useEffect(() => {
+    setStoredUserDetailsRecord(getStoredUserDetailsRecord())
+  }, [])
+
+  useEffect(() => {
+    const loadMerchantName = async () => {
+      const existingUserDetails = getStoredUserDetailsRecord()
+
+      if (
+        existingUserDetails?.merchant_name ||
+        existingUserDetails?.merchantName ||
+        existingUserDetails?.name ||
+        existingUserDetails?.adminName
+      ) {
+        setStoredUserDetailsRecord(existingUserDetails)
+        return
+      }
+
+      const storedProfile = window.sessionStorage.getItem(authStorageKeys.oidcProfile)
+      const profileData = storedProfile ? JSON.parse(storedProfile) : null
+      const mobileNumber = profileData?.user_name ?? ''
+
+      if (!mobileNumber) {
+        return
+      }
+
+      try {
+        const response = await apiRequest(apiConfig.fetchUserDetailsEndpoint, {
+          method: 'POST',
+          body: JSON.stringify({
+            mobile_number: mobileNumber,
+          }),
+        })
+
+        window.sessionStorage.setItem(authStorageKeys.userDetails, JSON.stringify(response))
+        setStoredUserDetailsRecord(
+          Array.isArray(response)
+            ? response[0] ?? null
+            : response?.data && Array.isArray(response.data)
+              ? response.data[0] ?? null
+              : response?.data && typeof response.data === 'object'
+                ? response.data
+                : response,
+        )
+      } catch (error) {
+        console.error('[Profile Details] Failed to auto-fetch merchant name', error)
+      }
+    }
+
+    loadMerchantName()
+  }, [])
+
   // The user details API can return different shapes, so normalize it before rendering.
   const detailSource = Array.isArray(profileDetails)
     ? profileDetails[0] ?? null
@@ -106,6 +188,13 @@ export function PortalTopNav({ isSidebarCollapsed, onToggleSidebar, onLogout }) 
         ? profileDetails.data
         : profileDetails
   const detailEntries = getDisplayEntries(detailSource)
+  const profileDisplayName =
+    storedUserDetailsRecord?.merchant_name ??
+    storedUserDetailsRecord?.merchantName ??
+    storedUserDetailsRecord?.name ??
+    storedUserDetailsRecord?.adminName ??
+    'IDBI INTERNAL'
+  const profileAvatarLabel = String(profileDisplayName).trim().charAt(0).toUpperCase() || 'I'
 
   const handleViewDetails = async () => {
     const storedProfile = window.sessionStorage.getItem(authStorageKeys.oidcProfile)
@@ -129,6 +218,16 @@ export function PortalTopNav({ isSidebarCollapsed, onToggleSidebar, onLogout }) 
       })
 
       console.log('[Profile Details] fetchById response', response)
+      window.sessionStorage.setItem(authStorageKeys.userDetails, JSON.stringify(response))
+      setStoredUserDetailsRecord(
+        Array.isArray(response)
+          ? response[0] ?? null
+          : response?.data && Array.isArray(response.data)
+            ? response.data[0] ?? null
+            : response?.data && typeof response.data === 'object'
+              ? response.data
+              : response,
+      )
       setProfileDetails(response)
       setIsProfileDetailsOpen(true)
     } catch (error) {
@@ -185,9 +284,9 @@ export function PortalTopNav({ isSidebarCollapsed, onToggleSidebar, onLogout }) 
             aria-expanded={isProfileMenuOpen}
           >
             <div className="portal-profile__avatar" aria-hidden="true">
-              I
+              {profileAvatarLabel}
             </div>
-            <span>IDBI INTERNAL</span>
+            <span>{profileDisplayName}</span>
             <span className="portal-profile__chevron" aria-hidden="true">
               <ChevronDownIcon />
             </span>
