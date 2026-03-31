@@ -1,0 +1,323 @@
+.qr-details-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.qr-details-panel,
+.qr-preview-card {
+  background: #ffffff;
+  border: 1px solid #edf1f4;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(22, 33, 44, 0.04);
+}
+
+.qr-details-panel {
+  padding: 16px;
+}
+
+.qr-details-panel__header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.qr-details-panel__label {
+  margin: 0 0 10px;
+  color: #7b858e;
+  font-size: 0.82rem;
+}
+
+.qr-details-toggle {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.qr-details-controls {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f3f6;
+}
+
+.qr-details-controls__hint {
+  margin: 0 0 14px;
+  color: #717b84;
+  font-size: 0.9rem;
+}
+
+.qr-details-controls__row {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.qr-details-controls__field {
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.qr-details-controls__field span {
+  color: #4b5760;
+  font-size: 0.82rem;
+}
+
+.qr-details-controls__field input {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #dde4eb;
+  border-radius: 4px;
+  font: inherit;
+}
+
+.qr-details-controls__field input:focus {
+  outline: none;
+  border-color: #178f80;
+  box-shadow: 0 0 0 3px rgba(23, 143, 128, 0.1);
+}
+
+.qr-preview-card {
+  min-height: 420px;
+  padding: 18px;
+}
+
+.qr-preview-card__inner {
+  min-height: 100%;
+  border: 1px dashed #c8d5db;
+  border-radius: 8px;
+  padding: 26px 18px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-preview-card__eyebrow {
+  margin: 0;
+  color: #2f3940;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.qr-preview-card__amount {
+  margin-top: 8px;
+  color: #b31d59;
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.qr-ticket {
+  width: min(100%, 230px);
+  margin-top: 18px;
+  padding: 16px 16px 14px;
+  border: 1px solid #dbe5ec;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 10px 22px rgba(27, 41, 54, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qr-ticket__dynamic-card {
+  position: relative;
+  width: 100%;
+  padding: 6px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #2552a7 0%, #2552a7 50%, #c83732 100%);
+  box-shadow: 0 14px 28px rgba(27, 41, 54, 0.14);
+}
+
+.qr-ticket__dynamic-top-border {
+  position: absolute;
+  inset: 6px 6px auto;
+  height: 5px;
+  border-radius: 999px;
+  background: #2552a7;
+}
+
+.qr-ticket__dynamic-inner {
+  min-height: 430px;
+  padding: 28px 18px 26px;
+  border-radius: 18px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qr-ticket__dynamic-logo {
+  width: 132px;
+  height: auto;
+  display: block;
+}
+
+.qr-ticket__dynamic-meta {
+  margin-top: 6px;
+  color: #7b6956;
+  font-size: 0.52rem;
+  font-weight: 500;
+  text-align: center;
+  word-break: break-all;
+}
+
+.qr-ticket--static {
+  border: 5px solid #214c9c;
+  outline: 3px solid #d54a44;
+  outline-offset: 0;
+  padding: 12px;
+}
+
+.qr-ticket__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.qr-ticket__merchant {
+  margin-top: 28px;
+  color: #1f1d1a;
+  font-size: 1rem;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.qr-ticket__subtitle {
+  margin-top: 6px;
+  color: #29353d;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.qr-ticket__code {
+  position: relative;
+  width: 154px;
+  height: 154px;
+  margin-top: 14px;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.92) 10%, transparent 10%, transparent 20%, rgba(0, 0, 0, 0.92) 20%, rgba(0, 0, 0, 0.92) 30%, transparent 30%, transparent 40%, rgba(0, 0, 0, 0.92) 40%, rgba(0, 0, 0, 0.92) 50%, transparent 50%, transparent 60%, rgba(0, 0, 0, 0.92) 60%, rgba(0, 0, 0, 0.92) 70%, transparent 70%, transparent 80%, rgba(0, 0, 0, 0.92) 80%),
+    linear-gradient(rgba(0, 0, 0, 0.92) 10%, transparent 10%, transparent 20%, rgba(0, 0, 0, 0.92) 20%, rgba(0, 0, 0, 0.92) 30%, transparent 30%, transparent 40%, rgba(0, 0, 0, 0.92) 40%, rgba(0, 0, 0, 0.92) 50%, transparent 50%, transparent 60%, rgba(0, 0, 0, 0.92) 60%, rgba(0, 0, 0, 0.92) 70%, transparent 70%, transparent 80%, rgba(0, 0, 0, 0.92) 80%);
+  background-size: 14px 14px;
+  border: 6px solid #ffffff;
+  box-shadow: 0 0 0 1px #d9e0e6;
+}
+
+.qr-ticket__finder {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 5px solid #000000;
+  background: #ffffff;
+}
+
+.qr-ticket__finder::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  background: #000000;
+}
+
+.qr-ticket__finder--top-left {
+  top: 6px;
+  left: 6px;
+}
+
+.qr-ticket__finder--top-right {
+  top: 6px;
+  right: 6px;
+}
+
+.qr-ticket__finder--bottom-left {
+  bottom: 6px;
+  left: 6px;
+}
+
+.qr-ticket__upi {
+  margin-top: 14px;
+  color: #2e2a28;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  word-break: break-all;
+}
+
+.qr-ticket__brands {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #55525a;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.qr-ticket__dynamic-footer {
+  margin-top: auto;
+  padding-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.qr-ticket__dynamic-powered {
+  color: #7c7773;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.qr-ticket__dynamic-caption {
+  color: #8a847d;
+  font-size: 0.42rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.qr-ticket__dynamic-apps {
+  width: 100%;
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.qr-ticket__dynamic-apps span {
+  min-height: 22px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #f4f7fb;
+  color: #4b5760;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.qr-preview-card .reports-action-button {
+  margin-top: 20px;
+}
+
+.qr-preview-card__validity {
+  margin: 14px 0 0;
+  color: #c24c7c;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .qr-details-panel__header,
+  .qr-details-controls__row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

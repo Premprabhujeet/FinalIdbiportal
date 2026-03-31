@@ -1,0 +1,37 @@
+.portal-table-card {
+  background: #ffffff;
+  border: 1px solid #f0f2f4;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(22, 33, 44, 0.04);
+  overflow: hidden;
+}
+
+.portal-table-card__header,
+.portal-table-card__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px 18px;
+}
+
+.portal-table-card__header {
+  background: #f6f8fa;
+  color: #50606a;
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.portal-table-card__row {
+  color: #25323a;
+  font-size: 0.94rem;
+}
+
+@media (max-width: 640px) {
+  .portal-table-card__header,
+  .portal-table-card__row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

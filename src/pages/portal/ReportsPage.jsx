@@ -3,6 +3,7 @@ import { authStorageKeys } from '../../config/authConfig'
 import { apiConfig } from '../../config/apiConfig'
 import { LoaderOverlay } from '../../components/ui/LoaderOverlay'
 import { Snackbar } from '../../components/ui/Snackbar'
+import '../../components/portal/styles/ReportsPage.css'
 
 // List of months for monthly filter dropdown
 const monthlyOptions = [

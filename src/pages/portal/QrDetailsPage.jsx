@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
+import idbiBankLogo from '../../assets/idbi-bank-logo.svg'
 import { authStorageKeys } from '../../config/authConfig'
 import { apiConfig } from '../../config/apiConfig'
 import { LoaderOverlay } from '../../components/ui/LoaderOverlay'
 import { Snackbar } from '../../components/ui/Snackbar'
 import { apiRequest } from '../../services/apiClient'
+import '../../components/portal/styles/ReportsPage.css'
+import '../../components/portal/styles/QrDetailsPage.css'
 
 // Supported payment apps shown in dynamic QR UI
 const paymentApps = ['CRED', 'navi', 'paytm']
@@ -37,6 +40,30 @@ function toPngDataUrl(base64Image) {
 
   // Wrap raw base64 string into PNG format
   return `data:image/png;base64,${base64Image}`
+}
+
+function getStoredUserDetails() {
+  const storedUserDetails = window.sessionStorage.getItem(authStorageKeys.userDetails)
+  if (!storedUserDetails) {
+    return null
+  }
+
+  try {
+    const parsedUserDetails = JSON.parse(storedUserDetails)
+
+    if (Array.isArray(parsedUserDetails)) {
+      return parsedUserDetails[0] ?? null
+    }
+
+    if (parsedUserDetails?.data && Array.isArray(parsedUserDetails.data)) {
+      return parsedUserDetails.data[0] ?? null
+    }
+
+    return parsedUserDetails
+  } catch (error) {
+    console.error('[QR Details] Failed to parse stored user details', error)
+    return null
+  }
 }
 
 export function QrDetailsPage() {
@@ -73,6 +100,18 @@ export function QrDetailsPage() {
   // Trimmed and numeric versions of amount input
   const trimmedAmount = amountInput.trim()
   const numericAmount = Number(trimmedAmount)
+  const storedUserDetails = useMemo(() => getStoredUserDetails(), [])
+  const merchantName =
+    storedUserDetails?.merchant_name ??
+    storedUserDetails?.merchantName ??
+    storedUserDetails?.merchant_name_on_qr ??
+    storedUserDetails?.adminName ??
+    'IDBI BANK SB ISERVEU'
+  const merchantUpiId =
+    storedUserDetails?.vpa_id ??
+    storedUserDetails?.upi_id ??
+    storedUserDetails?.upiId ??
+    'idbitestuser.iserveu@idbi'
 
   // Dynamic title based on QR type
   const qrTitle = useMemo(() => {
@@ -366,33 +405,37 @@ export function QrDetailsPage() {
               {/* Dynamic QR UI (Frontend Simulation) */}
               {qrType === 'dynamic' ? (
                 <>
-                  <div className="qr-ticket__merchant">KRIPA SINDHU PAIRA</div>
-                  <div className="qr-ticket__subtitle">Scan &amp; Pay</div>
+                  <div className="qr-ticket__dynamic-card">
+                    <div className="qr-ticket__dynamic-top-border" aria-hidden="true" />
+                    <div className="qr-ticket__dynamic-inner">
+                      <img className="qr-ticket__dynamic-logo" src={idbiBankLogo} alt="IDBI Bank" />
 
-                  <div className="qr-ticket__code" aria-hidden="true">
-                    <span className="qr-ticket__finder qr-ticket__finder--top-left" />
-                    <span className="qr-ticket__finder qr-ticket__finder--top-right" />
-                    <span className="qr-ticket__finder qr-ticket__finder--bottom-left" />
-                  </div>
+                      <div className="qr-ticket__dynamic-meta">UPI ID : {merchantUpiId}</div>
 
-                <div className="qr-ticket__upi">UPI Id: 20250602000094.iserveuprsbrp@cbin</div>
+                      <div className="qr-ticket__merchant">{merchantName}</div>
 
-                  {/* Payment apps */}
-                  <div className="qr-ticket__brands">
-                    <span>BHIM</span>
-                    <span>UPI</span>
-                  </div>
+                      <div className="qr-ticket__code" aria-hidden="true">
+                        <span className="qr-ticket__finder qr-ticket__finder--top-left" />
+                        <span className="qr-ticket__finder qr-ticket__finder--top-right" />
+                        <span className="qr-ticket__finder qr-ticket__finder--bottom-left" />
+                      </div>
 
-                  <div className="qr-ticket__payments">
-                    <span>Cent ez</span>
-                    <span>PhonePe</span>
-                    <span>G Pay</span>
-                  </div>
+                      <div className="qr-ticket__upi">UPI ID : {merchantUpiId}</div>
 
-                  <div className="qr-ticket__payments qr-ticket__payments--secondary">
-                    {paymentApps.map((app) => (
-                      <span key={app}>{app}</span>
-                    ))}
+                      <div className="qr-ticket__dynamic-footer">
+                        <span className="qr-ticket__dynamic-powered">POWERED BY</span>
+                        <div className="qr-ticket__brands">
+                          <span>UPI</span>
+                        </div>
+                        <span className="qr-ticket__dynamic-caption">UNIFIED PAYMENTS INTERFACE</span>
+                      </div>
+                    </div>
+
+                    <div className="qr-ticket__dynamic-apps">
+                      {paymentApps.map((app) => (
+                        <span key={app}>{app}</span>
+                      ))}
+                    </div>
                   </div>
                 </>
               ) : null}

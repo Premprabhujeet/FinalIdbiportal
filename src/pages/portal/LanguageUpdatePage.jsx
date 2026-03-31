@@ -5,6 +5,7 @@ import { apiConfig } from '../../config/apiConfig'
 import { LoaderOverlay } from '../../components/ui/LoaderOverlay'
 import { Snackbar } from '../../components/ui/Snackbar'
 import { apiRequest } from '../../services/apiClient'
+import '../../components/portal/styles/LanguageUpdatePage.css'
 
 // Initial form state
 const initialValues = {

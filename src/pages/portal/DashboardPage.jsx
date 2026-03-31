@@ -4,6 +4,7 @@ import { apiConfig } from '../../config/apiConfig'
 import { StatCard } from '../../components/portal/StatCard'
 import { LoaderOverlay } from '../../components/ui/LoaderOverlay'
 import { apiRequest } from '../../services/apiClient'
+import '../../components/portal/styles/DashboardPage.css'
 
 function IndentIcon() {
   return (

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { PortalSidebar } from '../../components/portal/PortalSidebar'
 import { PortalTopNav } from '../../components/portal/PortalTopNav'
+import '../../components/portal/styles/PortalLayout.css'
+
 export function PortalLayout({ onLogout }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 

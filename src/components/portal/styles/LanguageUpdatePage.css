@@ -1,0 +1,138 @@
+.language-update-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.language-update-card {
+  background: #ffffff;
+  border: 1px solid #edf1f4;
+  border-radius: 8px;
+  padding: 16px 14px 18px;
+}
+
+.language-update-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
+.language-update-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.language-update-field span {
+  color: #7b858e;
+  font-size: 0.78rem;
+}
+
+.language-update-field input,
+.language-update-field select {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #e0e5e9;
+  border-radius: 2px;
+  background: #ffffff;
+  color: #2a3137;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.language-update-field input:focus,
+.language-update-field select:focus {
+  outline: none;
+  border-color: #178f80;
+  box-shadow: 0 0 0 3px rgba(23, 143, 128, 0.1);
+}
+
+.language-update-field__error {
+  color: #d46f68;
+  font-size: 0.74rem;
+}
+
+.language-update-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.language-update-actions .ui-button {
+  margin-top: 0;
+  min-width: 84px;
+  height: 36px;
+  font-size: 0.84rem;
+}
+
+.language-update-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 24, 32, 0.36);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 60;
+}
+
+.language-update-modal {
+  width: min(100%, 360px);
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+  overflow: hidden;
+}
+
+.language-update-modal__body {
+  padding: 18px 18px 22px;
+  text-align: center;
+}
+
+.language-update-modal__title {
+  margin: 0;
+  color: #222d35;
+  font-size: 1rem;
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+.language-update-modal__icon {
+  width: 76px;
+  height: 76px;
+  margin: 18px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #2ecc71 0%, #25c864 100%);
+  box-shadow: 0 0 0 4px #d9f7e5, 0 0 0 8px #edfdf3;
+}
+
+.language-update-modal__check {
+  color: #ffffff;
+  font-size: 2.4rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.language-update-modal__footer {
+  padding: 12px;
+  border-top: 1px solid #eef2f5;
+}
+
+.language-update-modal__button {
+  width: 100%;
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .language-update-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .language-update-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

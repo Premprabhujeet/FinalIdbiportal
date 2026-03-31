@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import '../../components/portal/styles/HelpSupportPage.css'
 
 const initialTickets = [
   {

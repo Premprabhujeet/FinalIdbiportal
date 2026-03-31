@@ -1,3 +1,5 @@
+import '../../components/portal/styles/PortalContentPage.css'
+
 export function PortalContentPage({ title, summary, columns }) {
   return (
     <section className="portal-section">
